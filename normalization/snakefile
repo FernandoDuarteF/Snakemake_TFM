@@ -1,0 +1,22 @@
+conditions = glob_wildcards("../trimmed_reads/{condition}_1.fastq.gz").condition
+
+base_path = (os.path.abspath(".."))
+
+rule all:
+    input:
+        expand("metaxa/{cond}/{cond}.taxonomy.txt", cond = conditions)
+
+rule metaxa:
+    input:
+        R = base_path + "/trimmed_reads/{cond}_1.fastq.gz",
+        F = base_path + "/trimmed_reads/{cond}_2.fastq.gz"
+    params:
+        "metaxa/{cond}/{cond}"
+    output:
+        "metaxa/{cond}/{cond}.taxonomy.txt"
+    conda:
+        base_path + "/conda/metataxa.yaml"
+    shell:
+        """
+        metaxa2 -1 {input.F} -2 {input.R} -o {params} --mode m -t bacteria
+        """
